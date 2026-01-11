@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+python-multipart
+pydantic
+
+chromadb
+sentence-transformers
+torch
+
+openai
+python-dotenv
+langfuse
+
+pymupdf
+pdfplumber

@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv
+backend/venv/
+
+# Environment Files
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# Node
+node_modules/
+frontend/node_modules/
+
+# Build Outputs
+dist/
+build/
+*.egg-info/
+frontend/build/
+
+# Data & Models
+chroma_db_gold/
+backend/chroma_db_gold/
+backend/data/raw_datasets/
+*.pkl
+*.pt
+
+# Uploads & Temp
+uploads/
+temp/
+backend/uploads/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/

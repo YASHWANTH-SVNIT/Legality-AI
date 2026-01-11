@@ -1,0 +1,83 @@
+{
+  "Termination for Convenience": [
+    {
+      "text": "Either party may terminate this Agreement for convenience upon thirty (30) days prior written notice to the other party.",
+      "hypothesis": "One party can terminate without notice period",
+      "source": "https://www.lawinsider.com/clause/termination-for-convenience [web:1]"
+    },
+    {
+      "text": "Either Party may terminate this Agreement, in whole or in part, for its convenience by giving the other Party at least sixty (60) days prior written notice.",
+      "hypothesis": "One party can terminate without notice period",
+      "source": "https://afterpattern.com/clauses/termination-for-convenience [web:2]"
+    },
+    {
+      "text": "This Agreement may be terminated by either party upon ninety (90) days written notice to the other party for any reason or no reason.",
+      "hypothesis": "One party can terminate without notice period",
+      "source": "https://www.lawinsider.com/clause/termination-of-convenience [web:11]"
+    },
+    {
+      "text": "Either party shall have the right to terminate this Agreement for convenience upon providing thirty (30) days advance written notice.",
+      "hypothesis": "One party can terminate without notice period",
+      "source": "https://commonpaper.com/standards/cloud-service-agreement/right-to-terminate-for-convenience-after-set-time-period/ [web:10]"
+    },
+    {
+      "text": "Any party may terminate this Agreement for its own convenience by giving the other party not less than forty-five (45) days prior written notice.",
+      "hypothesis": "One party can terminate without notice period",
+      "source": "https://www.lawinsider.com/clause/termination-for-convenience [web:1]"
+    }
+  ],
+  "Uncapped Liability": [
+    {
+      "text": "Each party's total aggregate liability under this Agreement shall not exceed the total fees paid or payable by Customer to Company during the twelve (12) months preceding the claim.",
+      "hypothesis": "Liability has no upper monetary limit",
+      "source": "https://afterpattern.com/clauses/limitation-of-liability [web:21]"
+    },
+    {
+      "text": "Company's maximum liability arising out of or relating to this Agreement shall be limited to an amount equal to twelve (12) months of the fees paid by Customer.",
+      "hypothesis": "Liability has no upper monetary limit",
+      "source": "https://www.spellbook.legal/clauses/limitation-of-liability [web:22]"
+    },
+    {
+      "text": "Neither party's liability for any claim arising out of this Agreement shall exceed one hundred thousand dollars ($100,000) or the total fees paid, whichever is greater.",
+      "hypothesis": "Liability has no upper monetary limit",
+      "source": "https://commonpaper.com/blog/understanding-the-limitation-of-liability-clause/ [web:26]"
+    },
+    {
+      "text": "The total liability of each party to the other shall not exceed the amount of fees paid by Customer to Provider in the twelve months prior to the claim.",
+      "hypothesis": "Liability has no upper monetary limit",
+      "source": "https://www.icertis.com/contracting-basics/limitation-of-liability-clause/ [web:34]"
+    },
+    {
+      "text": "Except for indemnification obligations, each party's liability shall be capped at three (3) times the annual fees paid under this Agreement.",
+      "hypothesis": "Liability has no upper monetary limit",
+      "source": "https://www.spotdraft.com/blog/limitation-of-liability-clause-everything-you-need-to-know [web:40]"
+    }
+  ],
+  "Non Compete": [
+    {
+      "text": "Each party may freely engage in any business activities, including those that compete with the other party, subject only to confidentiality obligations.",
+      "hypothesis": "Parties cannot compete with each other",
+      "source": "https://www.lawinsider.com/clause/non-compete [web:41]"
+    },
+    {
+      "text": "Nothing in this Agreement restricts either party's right to develop, market, or provide competing products or services to third parties.",
+      "hypothesis": "Parties cannot compete with each other",
+      "source": "https://pro.bloomberglaw.com/insights/contracts/non-compete-clauses-in-employment-and-commercial-contracts/ [web:44]"
+    },
+    {
+      "text": "The parties acknowledge each has the right to conduct business independently and compete with the other, except as limited by confidentiality terms.",
+      "hypothesis": "Parties cannot compete with each other",
+      "source": "https://contracts.justia.com/contract-clauses/non-competition/ [web:51]"
+    },
+    {
+      "text": "Except for confidentiality obligations, neither party shall restrict the business activities or competitive opportunities of the other party.",
+      "hypothesis": "Parties cannot compete with each other",
+      "source": "https://www.lawinsider.com/clause/non-compete-provision [web:52]"
+    },
+    {
+      "text": "Each party retains full rights to pursue business opportunities, serve competitors, and engage in competitive activities without restriction.",
+      "hypothesis": "Parties cannot compete with each other",
+      "source": "https://www.lawinsider.com/clause/non-compete [web:41]"
+    }
+  ]
+}
