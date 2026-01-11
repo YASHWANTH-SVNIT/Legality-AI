@@ -80,6 +80,9 @@ legality_ai/
 ├── backend/
 │   ├── src/
 │   │   ├── api/                    # FastAPI routes and main app
+|   |   |   ├── models/
+│   │   │   │   ├── requests.py     
+│   │   │   │   └── responses.py                   
 │   │   │   ├── routes/
 │   │   │   │   ├── analysis.py     # Contract upload & analysis endpoints
 │   │   │   │   ├── feedback.py     # User feedback endpoints
@@ -351,6 +354,13 @@ Each risky clause is analyzed by 3 AI agents:
 - False negative reporting
 - Fix approval/rejection
 - Stores feedback for future model improvement
+
+## 🛠 Known Limitations
+
+- This system does not replace legal professionals
+- Only English-language contracts are currently supported
+- Risk scores are probabilistic and AI-generated
+- This is a prototype-grade system intended for research and evaluation
 
 
 ## 👨‍💻 Contributors

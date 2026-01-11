@@ -10,20 +10,36 @@ const AnalysisPage: React.FC = () => {
   const { status, results, error } = useAnalysis(analysisId!);
 
   if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 text-xl mb-4">{error}</p>
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="bg-white p-8 rounded-xl shadow-md max-w-md text-center">
+        <div className="text-5xl mb-4">⚠️</div>
+        <h2 className="text-xl font-bold mb-2">Analysis Failed</h2>
+        <p className="text-gray-600 mb-6">
+          Something went wrong while analyzing your contract.
+          Please try again or upload a different document.
+        </p>
+
+        <div className="flex gap-3 justify-center">
           <button
-            onClick={() => navigate('/')}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg"
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
-            Back to Home
+            Retry
+          </button>
+
+          <button
+            onClick={() => navigate("/")}
+            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+          >
+            Upload Another
           </button>
         </div>
       </div>
-    );
-  }
+    </div>
+  )
+}
+
 
   if (!results) {
     return (
@@ -82,5 +98,10 @@ const AnalysisPage: React.FC = () => {
     </div>
   );
 };
+
+<div className="bg-yellow-100 border-b border-yellow-300 text-yellow-900 px-6 py-2 text-sm">
+  ⚠️ This tool provides AI-generated risk indicators and does not constitute legal advice.
+</div>
+
 
 export default AnalysisPage;
