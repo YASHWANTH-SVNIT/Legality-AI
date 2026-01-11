@@ -356,12 +356,8 @@ Each risky clause is analyzed by 3 AI agents:
 ## 👨‍💻 Contributors
 
 **Yashwanth N** 
-- LinkedIn: [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
-- GitHub: [@yourusername](https://github.com/yourusername)
-
+      &
 **Divya Yadav**
-- LinkedIn: [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
-- GitHub: [@yourusername](https://github.com/yourusername)
 
 ## 🙏 Acknowledgments
 
