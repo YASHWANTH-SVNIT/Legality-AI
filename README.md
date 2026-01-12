@@ -109,10 +109,9 @@ legality_ai/
 │   │   │   │   └── semantic_chunker.py
 │   │   │   │
 │   │   │   ├── risk_analyzer/      # Stage 3: Adversarial analysis
-│   │   │   │   ├── pessimist_agent.py
-│   │   │   │   ├── optimist_agent.py
-│   │   │   │   ├── arbiter_agent.py
-│   │   │   │   └── adversarial_analyzer.py
+│   │   │   │   ├── adversial_analyser.py
+│   │   │   │   ├── paramter_extractor.py
+│   │   │   │   └──prompts.py
 │   │   │   │
 │   │   │   ├── fix_generator/      # Stage 4: Fix generation
 │   │   │   │   └── fix_generator.py
@@ -129,12 +128,9 @@ legality_ai/
 │   │   └── utils/                  # Utilities
 │   │       └── text_utils.py
 │   │
-│   ├── build_pipeline/             # Vector DB construction
-│   │   └── build_vector_db.py      # Build ChromaDB from CUAD dataset
+│   ├── build_pipeline/          # Build ChromaDB from CUAD dataset
 │   │
-│   ├── data/                       # Training data
-│   │   ├── verified_golden_rules.json    # 533 safe clauses
-│   │   └── extracted_clauses.json        # 107 risky clauses
+│   ├── data/                       
 │   │
 │   ├── chroma_db_gold/             # Vector database (generated)
 │   ├── uploads/                    # Temporary PDF storage
