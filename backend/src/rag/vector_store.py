@@ -132,6 +132,26 @@ class VectorStore:
             logger.error(f"Query failed: {e}")
             return []
     
+    def add_verified_clause(self, text: str, category: str, risk_level: str):
+        """Add a manually verified or user-corrected clause to the gold standards"""
+        import uuid
+        try:
+            self.golden_standards.add(
+                ids=[f"verified_{uuid.uuid4().hex[:8]}"],
+                documents=[text],
+                metadatas=[{
+                    "category": category,
+                    "risk_level": risk_level,
+                    "source": "user_feedback_sync",
+                    "timestamp": "" # Add if helpful
+                }]
+            )
+            logger.info(f"✅ Added safe clause to Chroma: {category}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to add verified clause: {e}")
+            return False
+
     def get_stats(self) -> Dict:
         try:
             gold_data = self.golden_standards.get()

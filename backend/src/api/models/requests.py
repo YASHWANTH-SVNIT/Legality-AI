@@ -11,3 +11,7 @@ class FeedbackRequest(BaseModel):
     user_id: Optional[str] = "anonymous"
     suggested_fix: Optional[str] = None
     approved: Optional[bool] = None
+    analysis_id: Optional[str] = None
+    pessimist_analysis: Optional[str] = None
+    optimist_analysis: Optional[str] = None
+    arbiter_reasoning: Optional[str] = None

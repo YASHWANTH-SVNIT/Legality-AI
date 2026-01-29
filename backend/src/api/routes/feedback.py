@@ -19,7 +19,12 @@ def report_false_positive(request: FeedbackRequest):
             category=request.category,
             system_risk_score=request.system_risk_score,
             user_comment=request.user_comment or "",
-            user_id=request.user_id
+            user_id=request.user_id,
+            analysis_id=request.analysis_id or "unknown",
+            pessimist=request.pessimist_analysis,
+            optimist=request.optimist_analysis,
+            arbiter=request.arbiter_reasoning,
+            suggested_fix=request.suggested_fix
         )
         
         return FeedbackResponse(
@@ -40,7 +45,8 @@ def report_false_negative(request: FeedbackRequest):
             category=request.category,
             user_risk_score=request.user_risk_score or 70,
             user_comment=request.user_comment or "",
-            user_id=request.user_id
+            user_id=request.user_id,
+            analysis_id=request.analysis_id or "unknown"
         )
         
         return FeedbackResponse(
@@ -62,7 +68,11 @@ def approve_fix(request: FeedbackRequest):
             category=request.category,
             approved=request.approved or False,
             user_comment=request.user_comment or "",
-            user_id=request.user_id
+            user_id=request.user_id,
+            analysis_id=request.analysis_id or "unknown",
+            pessimist=request.pessimist_analysis,
+            optimist=request.optimist_analysis,
+            arbiter=request.arbiter_reasoning
         )
         
         message = "Fix approved!" if request.approved else "Thanks for feedback!"

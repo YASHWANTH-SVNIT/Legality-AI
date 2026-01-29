@@ -10,35 +10,35 @@ const AnalysisPage: React.FC = () => {
   const { status, results, error } = useAnalysis(analysisId!);
 
   if (error) {
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-xl shadow-md max-w-md text-center">
-        <div className="text-5xl mb-4">⚠️</div>
-        <h2 className="text-xl font-bold mb-2">Analysis Failed</h2>
-        <p className="text-gray-600 mb-6">
-          Something went wrong while analyzing your contract.
-          Please try again or upload a different document.
-        </p>
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-xl shadow-md max-w-md text-center">
+          <div className="text-5xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold mb-2">Analysis Failed</h2>
+          <p className="text-gray-600 mb-6">
+            Something went wrong while analyzing your contract.
+            Please try again or upload a different document.
+          </p>
 
-        <div className="flex gap-3 justify-center">
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Retry
-          </button>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Retry
+            </button>
 
-          <button
-            onClick={() => navigate("/")}
-            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-          >
-            Upload Another
-          </button>
+            <button
+              onClick={() => navigate("/")}
+              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              Upload Another
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  )
-}
+    )
+  }
 
 
   if (!results) {
@@ -91,7 +91,12 @@ const AnalysisPage: React.FC = () => {
         <div>
           <h2 className="text-2xl font-bold mb-4">Risky Clauses</h2>
           {results.risky_clauses.map((clause, i) => (
-            <ClauseCard key={clause.chunk_id} clause={clause} index={i} />
+            <ClauseCard
+              key={clause.chunk_id}
+              clause={clause}
+              index={i}
+              analysisId={results.analysis_id}
+            />
           ))}
         </div>
       </div>

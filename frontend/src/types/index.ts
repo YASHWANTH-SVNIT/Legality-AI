@@ -22,6 +22,7 @@ export interface CompoundRisk {
 }
 
 export interface AnalysisResults {
+  analysis_id?: string;
   document: {
     filename: string;
     total_chunks: number;

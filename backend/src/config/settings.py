@@ -10,7 +10,7 @@ DATA_DIR = BASE_DIR / "data"
 CHROMA_DB_PATH = BASE_DIR / "chroma_db_gold"
 LOGS_DIR = BASE_DIR / "logs"
 
-LOGS_DIR.mkdir(exist_ok=False)
+LOGS_DIR.mkdir(exist_ok=True)
 
 # VECTOR DATABASE
 COLLECTION_GOLDEN_STANDARDS = "legal_gold_standards"
@@ -49,10 +49,10 @@ class LLMConfig:
     BASE_URL = "https://openrouter.ai/api/v1"
     
     MODELS = {
-    "fast": ["anthropic/claude-3.5-haiku"],
-    "smart": ["anthropic/claude-3.5-haiku"],  
-    "structured": ["anthropic/claude-3.5-haiku"]
-}
+        "fast": ["deepseek/deepseek-chat", "google/gemini-2.0-flash-001"],
+        "smart": ["deepseek/deepseek-chat", "google/gemini-2.0-flash-001"],  
+        "structured": ["deepseek/deepseek-chat", "google/gemini-2.0-flash-001"]
+    }
     
     MAX_RETRIES = 3
     RETRY_DELAY = 3

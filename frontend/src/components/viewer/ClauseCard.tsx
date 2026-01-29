@@ -7,9 +7,10 @@ import { getRiskBorderColor } from '../../utils/colors';
 interface ClauseCardProps {
   clause: RiskyClause;
   index: number;
+  analysisId?: string;
 }
 
-const ClauseCard: React.FC<ClauseCardProps> = ({ clause, index }) => {
+const ClauseCard: React.FC<ClauseCardProps> = ({ clause, index, analysisId }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   return (
@@ -86,7 +87,7 @@ const ClauseCard: React.FC<ClauseCardProps> = ({ clause, index }) => {
 
       {/* Feedback Section */}
       <div className="mt-4 pt-4 border-t">
-        <FeedbackButtons clause={clause} />
+        <FeedbackButtons clause={clause} analysisId={analysisId} />
       </div>
     </div>
   );

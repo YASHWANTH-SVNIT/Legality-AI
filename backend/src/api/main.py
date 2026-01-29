@@ -6,7 +6,7 @@ import os
 import logging
 from dotenv import load_dotenv
 
-from src.api.routes import analysis, feedback, health
+from src.api.routes import analysis, feedback, health, admin
 
 load_dotenv()
 is_production = os.getenv("ENVIRONMENT") == "production"
@@ -40,6 +40,7 @@ if os.path.exists("./uploads"):
 
 app.include_router(analysis.router, prefix="/analyze", tags=["Analysis"])
 app.include_router(feedback.router, prefix="/feedback", tags=["Feedback"])
+app.include_router(admin.router, prefix="/admin", tags=["Admin"])
 app.include_router(health.router, tags=["Health"])
 
 @app.exception_handler(Exception)

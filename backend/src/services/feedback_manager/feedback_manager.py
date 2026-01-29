@@ -8,6 +8,7 @@ from chromadb.utils import embedding_functions
 
 from src.config.settings import VectorDBConfig
 from src.core.models import RiskAnalysis, GeneratedFix
+from src.database import get_db_connection
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +65,21 @@ class FeedbackManager:
         
         return collection
     
+    def _save_to_db(self, table: str, data: Dict[str, Any]):
+        """Save data to SQLite database"""
+        try:
+            placeholders = ', '.join(['?'] * len(data))
+            columns = ', '.join(data.keys())
+            values = tuple(data.values())
+            
+            with get_db_connection() as conn:
+                conn.execute(
+                    f"INSERT INTO {table} ({columns}) VALUES ({placeholders})", 
+                    values
+                )
+        except Exception as e:
+            logger.error(f"❌ Failed to save to DB: {e}")
+    
     def add_false_positive_correction(
         self,
         chunk_id: str,
@@ -71,7 +87,12 @@ class FeedbackManager:
         category: str,
         system_risk_score: int,
         user_comment: str = "",
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
+        analysis_id: str = "unknown",
+        pessimist: Optional[str] = None,
+        optimist: Optional[str] = None,
+        arbiter: Optional[str] = None,
+        suggested_fix: Optional[str] = None
     ) -> str:
 
         feedback_id = f"fp_{chunk_id}_{datetime.utcnow().timestamp()}"
@@ -94,6 +115,23 @@ class FeedbackManager:
         )
         
         logger.info(f"✅ False positive recorded: {chunk_id}")
+        
+        # Save to SQLite
+        self._save_to_db("feedback", {
+            "analysis_id": analysis_id,
+            "chunk_id": chunk_id,
+            "category": category,
+            "feedback_type": "false-positive",
+            "clause_text": original_text,
+            "system_risk_score": system_risk_score,
+            "user_comment": user_comment,
+            "user_id": user_id or "anonymous",
+            "pessimist_analysis": pessimist,
+            "optimist_analysis": optimist,
+            "arbiter_reasoning": arbiter,
+            "suggested_fix": suggested_fix
+        })
+        
         return feedback_id
     
     def add_false_negative_correction(
@@ -103,7 +141,8 @@ class FeedbackManager:
         category: str,
         user_risk_score: int,
         user_comment: str = "",
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
+        analysis_id: str = "unknown"
     ) -> str:
 
         feedback_id = f"fn_{chunk_id}_{datetime.utcnow().timestamp()}"
@@ -126,6 +165,19 @@ class FeedbackManager:
         )
         
         logger.info(f"✅ False negative recorded: {chunk_id}")
+        
+        # Save to SQLite
+        self._save_to_db("feedback", {
+            "analysis_id": analysis_id,
+            "chunk_id": chunk_id,
+            "category": category,
+            "feedback_type": "false-negative",
+            "clause_text": original_text,
+            "system_risk_score": user_risk_score,
+            "user_comment": user_comment,
+            "user_id": user_id or "anonymous"
+        })
+        
         return feedback_id
     
     def add_fix_approval(
@@ -136,7 +188,11 @@ class FeedbackManager:
         category: str,
         approved: bool,
         user_comment: str = "",
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
+        analysis_id: str = "unknown",
+        pessimist: Optional[str] = None,
+        optimist: Optional[str] = None,
+        arbiter: Optional[str] = None
     ) -> str:
 
         feedback_id = f"fix_{chunk_id}_{datetime.utcnow().timestamp()}"
@@ -161,6 +217,22 @@ class FeedbackManager:
         else:
             logger.info(f"❌ Fix rejected: {chunk_id} - {user_comment}")
         
+        # Save to SQLite
+        self._save_to_db("feedback", {
+            "analysis_id": analysis_id,
+            "chunk_id": chunk_id,
+            "category": category,
+            "feedback_type": "approve-fix",
+            "approved": approved,
+            "clause_text": original_risky_text,
+            "suggested_fix": generated_fix,
+            "user_comment": user_comment,
+            "user_id": user_id or "anonymous",
+            "pessimist_analysis": pessimist,
+            "optimist_analysis": optimist,
+            "arbiter_reasoning": arbiter
+        })
+        
         return feedback_id
     
     def add_risk_score_adjustment(
@@ -171,7 +243,8 @@ class FeedbackManager:
         system_score: int,
         user_score: int,
         user_comment: str = "",
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
+        analysis_id: str = "unknown"
     ) -> str:
 
         feedback_id = f"score_{chunk_id}_{datetime.utcnow().timestamp()}"
@@ -202,6 +275,32 @@ class FeedbackManager:
         )
         
         logger.info(f"✅ Score adjustment recorded: {chunk_id} ({system_score}→{user_score})")
+        
+        # Save to SQLite (treating as score-adjustment type if we want, or just log it)
+        # However, the schema doesn't have a specific type for this, maybe map to one of the others or leave out?
+        # The schema has feedback_type. I'll add a type 'score-adjustment' although not in initial comments.
+        # But for now, let's map to false-positive if score drops significantly?
+        # Let's stick to the schema types: 'false-positive', 'false-negative', 'approve-fix'
+        # If score safe -> risky: false-negative
+        # If score risky -> safe: false-positive
+        
+        feedback_type = "unknown"
+        if system_score >= 50 and user_score < 50:
+            feedback_type = "false-positive"
+        elif system_score < 50 and user_score >= 50:
+            feedback_type = "false-negative"
+            
+        if feedback_type != "unknown":
+            self._save_to_db("feedback", {
+                "analysis_id": analysis_id,
+                "chunk_id": chunk_id,
+                "category": category,
+                "feedback_type": feedback_type,
+                "clause_text": original_text,
+                "system_risk_score": system_score,
+                "user_id": user_id or "anonymous"
+            })
+
         return feedback_id
     
     def query_user_feedback(

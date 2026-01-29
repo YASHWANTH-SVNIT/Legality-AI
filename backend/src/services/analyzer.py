@@ -7,6 +7,11 @@ from src.rag.category_detector import CategoryDetector
 from src.services.risk_analyzer.adversarial_analyzer import AdversarialAnalyzer
 from src.services.fix_generator.fix_generator import FixGenerator
 from src.services.compound_detector.compound_detector import CompoundRiskDetector
+from src.database import get_db_connection
+
+import uuid
+import time
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +25,11 @@ class ContractAnalyzer:
         
         logger.info("✅ Contract Analyzer initialized")
     
+    
     def analyze_contract(self, file_path: Path) -> Dict[str, Any]:
-        logger.info(f"📄 Analyzing: {file_path.name}")
+        start_time = time.time()
+        analysis_id = str(uuid.uuid4())
+        logger.info(f"pV Analyzing: {file_path.name} (ID: {analysis_id})")
         
         # Stage 1: Extract
         doc = self.processor.process(file_path)
@@ -38,6 +46,7 @@ class ContractAnalyzer:
             
             analysis = self.risk_analyzer.analyze_risk(chunk, detection)
             
+            # Simple fixed threshold
             if not analysis.is_relevant or analysis.final_risk_score < 50:
                 continue
             
@@ -84,7 +93,22 @@ class ContractAnalyzer:
         avg_risk = sum(c["risk_score"] for c in risky_clauses) / len(risky_clauses) if risky_clauses else 0
         overall_risk = "Critical" if avg_risk >= 75 else "High" if avg_risk >= 60 else "Medium" if avg_risk >= 40 else "Low"
         
+        processing_time = time.time() - start_time
+        
+        # Save to DB
+        self._save_analysis_to_db({
+            "id": analysis_id,
+            "filename": file_path.name,
+            "total_chunks": len(doc.chunks),
+            "risky_clauses_found": len(risky_clauses),
+            "avg_risk_score": avg_risk,
+            "overall_risk_level": overall_risk,
+            "processing_time_seconds": processing_time,
+            "compound_risks_found": len(compound_risks)
+        })
+        
         results = {
+            "analysis_id": analysis_id, # Return ID for feedback
             "document": {
                 "filename": file_path.name,
                 "total_chunks": len(doc.chunks),
@@ -102,3 +126,17 @@ class ContractAnalyzer:
         
         logger.info(f"✅ Analysis complete: {len(risky_clauses)} risky clauses")
         return results
+
+    def _save_analysis_to_db(self, data: Dict[str, Any]):
+        try:
+            placeholders = ', '.join(['?'] * len(data))
+            columns = ', '.join(data.keys())
+            values = tuple(data.values())
+            
+            with get_db_connection() as conn:
+                conn.execute(
+                    f"INSERT INTO analyses ({columns}) VALUES ({placeholders})", 
+                    values
+                )
+        except Exception as e:
+            logger.error(f"❌ Failed to save analysis to DB: {e}")
