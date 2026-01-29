@@ -196,7 +196,7 @@ legality_ai/
 
 ### Step 1: Clone Repository
 ```bash
-git clone https://github.com/yourusername/legality_ai.git
+git clone https://github.com/YASHWANTH-SVNIT/legality_ai.git
 cd legality_ai
 ```
 
