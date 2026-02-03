@@ -43,20 +43,26 @@ class RAGThresholds:
 
     PARAM_MISMATCH_THRESHOLD = 0.20  
 
-# LLM CONFIGURATION (OpenRouter)
+# LLM CONFIGURATION (Groq)
 class LLMConfig:
-    API_KEY = os.getenv("OPENROUTER_API_KEY")
-    BASE_URL = "https://openrouter.ai/api/v1"
+    # Using Groq for 10x speed + low cost
+    API_KEY = os.getenv("GROQ_API_KEY") 
+    BASE_URL = "https://api.groq.com/openai/v1"
     
     MODELS = {
-        "fast": ["deepseek/deepseek-chat", "google/gemini-2.0-flash-001"],
-        "smart": ["deepseek/deepseek-chat", "google/gemini-2.0-flash-001"],  
-        "structured": ["deepseek/deepseek-chat", "google/gemini-2.0-flash-001"]
+        # High speed logic summaries / formatting
+        "fast": ["llama-3.1-8b-instant", "mixtral-8x7b-32768"],
+        
+        # Deep reasoning (The Debate Loop)
+        "smart": ["llama-3.3-70b-versatile"],  
+        
+        # JSON enforcement
+        "structured": ["llama-3.3-70b-versatile"]
     }
     
     MAX_RETRIES = 3
-    RETRY_DELAY = 3
-    TIMEOUT = 60
+    RETRY_DELAY = 1
+    TIMEOUT = 30
 
 # LANGFUSE OBSERVABILITY
 class LangfuseConfig:

@@ -2,17 +2,26 @@
 
 An intelligent contract analysis system that uses adversarial AI agents and RAG (Retrieval-Augmented Generation) to identify risky clauses in legal contracts and suggest safer alternatives.
 
+![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python)
+![React](https://img.shields.io/badge/React-18.2-61DAFB?logo=react)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi)
+![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector_DB-purple)
+![Groq](https://img.shields.io/badge/LLM-Groq_Llama_3.3-orange)
+
 --------------------------------------------
 
 ## 📋 Table of Contents
 
 - [Overview](#overview)
 - [Key Features](#key-features)
+- [System Architecture](#system-architecture)
+- [The Debate Loop (Multi-Agent Analysis)](#the-debate-loop-multi-agent-analysis)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Installation & Setup](#installation--setup)
 - [How to Run](#how-to-run)
-- [How It Works](#how-it-works)
+- [API Reference](#api-reference)
+- [Configuration](#configuration)
 - [Contributors](#contributors)
 
 ---
@@ -22,105 +31,275 @@ An intelligent contract analysis system that uses adversarial AI agents and RAG 
 Legality AI analyzes legal contracts using a sophisticated pipeline powered by multiple AI agents. The system identifies risky clauses, evaluates them through adversarial analysis, and generates safer alternatives while detecting compound risks across the entire contract.
 
 **Built as a portfolio project to demonstrate:**
-- Advanced RAG implementation with semantic search
-- Multi-agent AI systems with adversarial analysis (The Debate Loop)
-- Full-stack development with modern frameworks
-- Production-grade error handling and fallback mechanisms
-- Secure admin-led knowledge base improvement
+- ✅ Advanced RAG implementation with semantic search (ChromaDB + Sentence Transformers)
+- ✅ Multi-agent AI systems with adversarial analysis ("The Debate Loop")
+- ✅ Full-stack development with modern frameworks (FastAPI + React + TypeScript)
+- ✅ Production-grade error handling, model fallback, and cost safeguards
+- ✅ Secure admin-led knowledge base improvement with batch vector sync
+- ✅ Intelligent OCR fallback for scanned documents
+- ✅ LLM Observability with Langfuse tracing
 
 ---
 
 ## ✨ Key Features
 
-### Core Analysis
-- **📄 PDF Contract Analysis** - Upload and process legal contracts in PDF format
-- **📷 OCR for Scanned Documents** - Intelligent fallback that automatically detects scanned PDFs and uses Tesseract OCR to extract text
-- **🤖 Adversarial AI Agents** - 3-agent system (**Pessimist, Optimist, Arbiter**) for a balanced "Debate Loop" risk assessment
-- **🔍 RAG-Powered Detection** - Semantic search against 640+ verified legal clauses from the CUAD dataset
-- **✍️ AI-Generated Fixes** - Automatically suggests safer alternative clauses that balance interests
-- **⚠️ Compound Risk Detection** - Identifies hidden interactions between multiple separate clauses (e.g., Termination + Unlimited Liability)
-- **📊 Interactive Dashboard** - Visual risk summary with expandable clause details and severity heatmaps
+### 📄 Document Processing
+| Feature | Description |
+|---------|-------------|
+| **PDF Upload** | Upload and process legal contracts in PDF format |
+| **Hybrid Text Extraction** | Uses PyMuPDF + PDFPlumber for maximum text recovery |
+| **OCR Fallback** | Automatically detects scanned documents (<100 chars) and switches to Tesseract OCR |
+| **Semantic Chunking** | Intelligently splits documents into meaningful chunks (100-800 chars) preserving sentence boundaries |
 
-### Admin & Feedback Management
-- **🔐 Secure Admin Portal** - Protected dashboard for managing system intelligence
-- **🗂️ Card-Based Review System** - Intuitive interface to approve or reject user-flagged safe/risky clauses
-- **🧐 Analysis Deep-Dive** - Complete transparency: view the exact Pessimist argument, Optimist defense, and Arbiter reasoning for every flagged clause
-- **⚡ Batch Vector Sync** - Admins can sync approved user suggestions to the vector database in bulk, requiring re-authentication for security
+### 🤖 AI-Powered Analysis
+| Feature | Description |
+|---------|-------------|
+| **RAG-Powered Detection** | Semantic search against 640+ verified legal clauses from the CUAD dataset |
+| **3-Zone RAG Logic** | Noise filtering (< 0.44), Agent review zone (0.44-0.85), Auto-safe (> 0.85) |
+| **Adversarial Debate Loop** | 3-agent system (Pessimist → Optimist → Arbiter) for balanced risk assessment |
+| **Parameter Extraction** | Extracts notice periods, monetary caps, party symmetry for structural comparison |
+| **Compound Risk Detection** | Identifies dangerous interactions between multiple clauses (e.g., Termination + Unlimited Liability) |
+| **AI-Generated Fixes** | Automatically suggests balanced alternative clauses |
+
+### 📊 Results & Reporting
+| Feature | Description |
+|---------|-------------|
+| **Interactive Dashboard** | Visual risk summary with expandable clause cards |
+| **Severity Heatmaps** | Color-coded risk levels (Low → Critical) |
+| **Deep-Dive Modal** | View Pessimist argument, Optimist defense, and Arbiter reasoning |
+| **Compound Risk Alerts** | Highlights hidden multi-clause interactions |
+
+### 🔐 Admin & Feedback System
+| Feature | Description |
+|---------|-------------|
+| **User Feedback Collection** | Users can report false positives or rate fix quality (👍/👎) |
+| **Secure Admin Portal** | Protected dashboard for reviewing user feedback |
+| **Batch Vector Sync** | Admins can sync approved corrections to ChromaDB in bulk |
+| **Auto-Archival** | Fix quality reviews auto-disappear after 30 days |
+| **CSV Export** | Download all feedback data for offline analysis |
+
+---
+
+## 🧠 System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              LEGALITY AI                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐   │
+│  │   UPLOAD    │───▶│   EXTRACT   │───▶│   DETECT    │───▶│   ANALYZE   │   │
+│  │  (PDF/OCR)  │    │  (Chunking) │    │    (RAG)    │    │(Debate Loop)│   │
+│  └─────────────┘    └─────────────┘    └─────────────┘    └──────┬──────┘   │
+│                                                                   │          │
+│                                                                   ▼          │
+│                                              ┌─────────────┐    ┌──────────┐ │
+│                                              │  COMPOUND   │◀───│   FIX    │ │
+│                                              │   DETECT    │    │GENERATOR │ │
+│                                              └──────┬──────┘    └──────────┘ │
+│                                                     │                        │
+│                                                     ▼                        │
+│  ┌─────────────────────────────────────────────────────────────────────────┐ │
+│  │                           RESULTS DASHBOARD                              │ │
+│  │  • Risky Clauses List  • Fix Suggestions  • Compound Risks              │ │
+│  │  • Debate Transparency • User Feedback    • Admin Review                │ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Data Flow
+
+1. **Upload**: User uploads a PDF contract
+2. **Extract**: Hybrid extraction (PyMuPDF + PDFPlumber) with OCR fallback
+3. **Chunk**: Semantic chunking preserving legal clause boundaries
+4. **Detect**: RAG query against 640+ verified clauses (3-zone filtering)
+5. **Analyze**: Adversarial Debate Loop (Pessimist → Optimist → Arbiter)
+6. **Fix**: AI generates balanced replacement clauses
+7. **Compound**: Detects dangerous clause interactions
+8. **Display**: Rich interactive dashboard with transparency
+
+---
+
+## 🎭 The Debate Loop (Multi-Agent Analysis)
+
+The core innovation of Legality AI is the **Adversarial Debate Loop** - a 3-agent system that ensures balanced risk assessment:
+
+```
+                    ┌─────────────────────┐
+                    │   CLAUSE + CONTEXT  │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+              ┌────────────────────────────────┐
+              │        🔴 PESSIMIST            │
+              │   "This clause is dangerous    │
+              │    because..."                 │
+              │   • Identifies worst-case      │
+              │   • Cites risky precedents     │
+              │   • Scores risk (0-100)        │
+              └────────────────┬───────────────┘
+                               │
+                               ▼
+              ┌────────────────────────────────┐
+              │        🟢 OPTIMIST             │
+              │   "But consider that..."       │
+              │   • Provides counterarguments  │
+              │   • Cites safe precedents      │
+              │   • Notes mitigating factors   │
+              └────────────────┬───────────────┘
+                               │
+                               ▼
+              ┌────────────────────────────────┐
+              │        ⚖️ ARBITER              │
+              │   "After weighing both..."     │
+              │   • Reaches final verdict      │
+              │   • Assigns final score        │
+              │   • Provides reasoning         │
+              └────────────────────────────────┘
+```
+
+### Why This Matters
+
+- **Prevents False Positives**: The Optimist challenges the Pessimist's claims
+- **Prevents False Negatives**: The Pessimist ensures real risks aren't dismissed
+- **Complete Transparency**: Users see the exact reasoning for every decision
+- **Balanced Assessment**: Neither agent alone determines the outcome
+
+---
+
+## 🎯 Current Scope & Limitations
+
+This system is a **specialized prototype** focusing on **3 High-Impact Categories**:
+
+| Category | What It Detects | Example Risk |
+|----------|-----------------|--------------|
+| **Unilateral Termination** | Unfair cancellation rights | "Company may terminate at any time without cause" |
+| **Unlimited Liability** | "Bet the company" exposure | "Vendor shall be liable for all damages" |
+| **Non-Compete** | Restrictive post-employment covenants | "Employee shall not compete for 5 years globally" |
+
+> 💡 **Note**: While the RAG architecture is designed to scale to hundreds of categories (the CUAD dataset has 41), this version is intentionally focused on these three to demonstrate deep adversarial reasoning.
+
 ---
 
 ## 🛠 Tech Stack
 
 ### Backend
-- **Python 3.11** - Core programming language
-- **FastAPI** - High-performance async REST API framework
-- **SQLite** - Persistent storage for analyses, feedback tracking, and admin actions
-- **ChromaDB** - Vector database for RAG and "Gold Standard" knowledge base
-- **Sentence Transformers** - Embedding generation (all-MiniLM-L6-v2)
-- **OpenRouter API** - Multi-model LLM access (Claude-3, GPT-4o, etc.) with automatic fallback
-- **PyPDF2 & PDFPlumber** - Hybrid PDF text extraction
-- **Tesseract OCR & Poppler** - Optical Character Recognition for scanned documents
+| Technology | Purpose |
+|------------|---------|
+| **Python 3.11** | Core programming language |
+| **FastAPI** | High-performance async REST API |
+| **SQLite** | Persistent storage for analyses & feedback |
+| **ChromaDB** | Vector database 
+| **Sentence Transformers** | Embeddings (all-MiniLM-L6-v2) |
+| **Groq API** | LLM inference (Llama-3.3-70b-versatile) |
+| **PyMuPDF + PDFPlumber** | Hybrid PDF extraction |
+| **Tesseract + Poppler** | OCR for scanned documents |
+| **Langfuse** | LLM observability and tracing |
 
 ### Frontend
-- **React 18.2** - UI framework
-- **TypeScript** - Type-safe development
-- **Vanilla CSS & Tailwind** - Modern, responsive styling with premium aesthetics
-- **Axios** - Async HTTP client
-- **Lucide React** - High-quality iconography
+| Technology | Purpose |
+|------------|---------|
+| **React 18.2** | UI framework |
+| **TypeScript** | Type-safe development |
+| **TailwindCSS** | Modern, responsive styling |
+| **Axios** | HTTP client |
+| **Lucide React** | Premium iconography |
 
-### AI/ML Components
-- **LangChain** - LLM orchestration and chain management
-- **Langfuse** - LLM observability and tracing
-- **OpenAI SDK** - Unified interface for multiple inference providers
+### AI/ML Pipeline
+| Component | Purpose |
+|-----------|---------|
+| **LLMClient** | Unified interface with model fallback & cost safeguards |
+| **CategoryDetector** | RAG-based semantic category matching |
+| **AdversarialAnalyzer** | 3-agent debate loop orchestration |
+| **FixGenerator** | Counter-clause generation with style matching |
+| **CompoundRiskDetector** | Multi-clause interaction analysis |
 
 ---
 
 ## 📁 Project Structure
+
 ```
 legality_ai/
 │
 ├── backend/
 │   ├── src/
-│   │   ├── api/                    # FastAPI routes and main app
-│   │   │   ├── models/             # Pydantic request/response schemas
+│   │   ├── api/                          # FastAPI Application
+│   │   │   ├── models/                   # Pydantic schemas
+│   │   │   │   ├── requests.py
+│   │   │   │   └── responses.py
 │   │   │   ├── routes/
-│   │   │   │   ├── admin.py        # NEW: Admin feedback & sync routes
-│   │   │   │   ├── analysis.py     # Document analysis pipeline
-│   │   │   │   └── feedback.py     # Public user feedback submission
-│   │   │   └── main.py             # App entry with RAG initialization
+│   │   │   │   ├── admin.py              # Admin feedback & sync
+│   │   │   │   ├── analysis.py           # Document analysis pipeline
+│   │   │   │   └── feedback.py           # User feedback submission
+│   │   │   └── main.py                   # App entry & middleware
 │   │   │
-│   │   ├── rag/                    # RAG components
-│   │   │   ├── vector_store.py     # ChromaDB & verified clause logic
-│   │   │   └── category_detector.py # Semantic similarity matching
+│   │   ├── core/                         # Core Infrastructure
+│   │   │   ├── llm_client.py             # LLM wrapper with cost safeguards
+│   │   │   └── models.py                 # Domain models (Pydantic)
 │   │   │
-│   │   ├── services/               # Business logic
-│   │   │   ├── document_processor/ # PDF extraction & chunking
-│   │   │   │   └── pdf_processor.py # Intelligent OCR Fallback Logic
-│   │   │   ├── risk_analyzer/      # Adversarial "Debate Loop" logic
-│   │   │   ├── fix_generator/      # Counter-clause generation
-│   │   │   ├── feedback_manager/   # SQLite persistence & batch sync
-│   │   │   └── analyzer.py         # Main pipeline orchestrator
+│   │   ├── rag/                          # RAG Components
+│   │   │   ├── vector_store.py           # ChromaDB interface
+│   │   │   └── category_detector.py      # Semantic similarity matching
 │   │   │
-│   │   └── database/               # SQL schema and connection logic
+│   │   ├── services/                     # Business Logic Layer
+│   │   │   ├── document_processor/
+│   │   │   │   ├── pdf_processor.py      # Hybrid extraction + OCR
+│   │   │   │   └── semantic_chunker.py   # Intelligent chunking
+│   │   │   ├── risk_analyzer/
+│   │   │   │   ├── adversarial_analyzer.py  # The Debate Loop
+│   │   │   │   ├── parameter_extractor.py   # Legal parameter extraction
+│   │   │   │   └── prompts.py               # Agent prompts
+│   │   │   ├── fix_generator/
+│   │   │   │   └── fix_generator.py      # Counter-clause generation
+│   │   │   ├── compound_detector/
+│   │   │   │   └── compound_detector.py  # Multi-clause risk detection
+│   │   │   ├── feedback_manager/
+│   │   │   │   └── feedback_manager.py   # SQLite persistence
+│   │   │   └── analyzer.py               # Main pipeline orchestrator
+│   │   │
+│   │   ├── config/
+│   │   │   └── settings.py               # Centralized configuration
+│   │   │
+│   │   └── database/                     # SQLite schemas
 │   │
-│   ├── data/                       # Seed data and sample contracts
-│   └── run.py                      # Application entry point
+│   ├── build_pipeline/                   # Data Factory (Offline)
+│   │   ├── cuad_extract.py               # CUAD dataset extraction
+│   │   ├── generator_agent.py            # Safe clause generation
+│   │   ├── nli_validator.py              # DeBERTa NLI validation
+│   │   ├── build_vector_db.py            # ChromaDB builder
+│   │   └── run.py                        # Pipeline orchestrator
+│   │
+│   ├── data/                             # Seed data & samples
+│   │   ├── verified_golden_rules.json    # 533 safe clauses
+│   │   └── extracted_clauses.json        # 107 risky clauses
+│   │
+│   ├── chroma_db_gold/                   # Vector database (~3.4 MB)
+│   ├── requirements.txt
+│   └── run.py                            # Application entry point
 │
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── admin/              # NEW: Admin UI (FeedbackTable, Health, etc)
-│   │   │   ├── upload/             # File drop-zone components
-│   │   │   ├── viewer/             # Results display & card view
-│   │   │   └── feedback/           # End-user reporting tools
+│   │   │   ├── admin/                    # Admin UI components
+│   │   │   │   └── FeedbackTable.tsx     # Review dashboard
+│   │   │   ├── upload/                   # File upload components
+│   │   │   ├── viewer/                   # Results display
+│   │   │   ├── feedback/                 # User feedback buttons
+│   │   │   └── common/                   # Shared components
 │   │   ├── pages/
-│   │   │   ├── HomePage.tsx        # Landing page
-│   │   │   ├── AnalysisPage.tsx    # detailed results
-│   │   │   ├── AdminPage.tsx       # Secure admin dashboard
-│   │   │   └── AdminLoginPage.tsx  # Admin authentication
-│   │   └── services/
-│   │       └── api.ts              # Centralized API service (Axios)
+│   │   │   ├── HomePage.tsx              # Landing page
+│   │   │   ├── AnalysisPage.tsx          # Results dashboard
+│   │   │   ├── AdminPage.tsx             # Admin portal
+│   │   │   └── AdminLoginPage.tsx        # Admin authentication
+│   │   ├── services/
+│   │   │   └── api.ts                    # Centralized API service
+│   │   └── types/                        # TypeScript interfaces
 │   │
-│   └── package.json                # Frontend dependencies
+│   ├── .env.example
+│   └── package.json
+│
+└── README.md
 ```
 
 ---
@@ -129,13 +308,17 @@ legality_ai/
 
 ### Prerequisites
 
-- **Python 3.11+**
-- **Node.js 18+** & npm
-- **OpenRouter API Key** 
-- **Git**
-- **OCR Tools (Required for Scanned PDFs)**:
-    - **Tesseract OCR**: Install from [UB-Mannheim/tesseract](https://github.com/UB-Mannheim/tesseract/wiki)
-    - **Poppler**: Install from [oschwartz10612/poppler-windows](https://github.com/oschwartz10612/poppler-windows/releases/)
+| Requirement | Version | Purpose |
+|-------------|---------|---------|
+| Python | 3.11+ | Backend runtime |
+| Node.js | 18+ | Frontend runtime |
+| Groq API Key | — | LLM inference |
+| Tesseract OCR | Latest | Scanned PDF support |
+| Poppler | Latest | PDF to image conversion |
+
+**OCR Tools Installation:**
+- **Tesseract**: [UB-Mannheim/tesseract](https://github.com/UB-Mannheim/tesseract/wiki)
+- **Poppler**: [oschwartz10612/poppler-windows](https://github.com/oschwartz10612/poppler-windows/releases/)
 
 ### Step 1: Clone Repository
 ```bash
@@ -145,52 +328,55 @@ cd legality_ai
 
 ### Step 2: Backend Setup
 ```bash
-# Navigate to backend
 cd backend
 
 # Create virtual environment
 python -m venv venv
 
-# Activate virtual environment
-# Windows:
+# Activate (Windows)
 venv\Scripts\activate
-# macOS/Linux:
+# Activate (macOS/Linux)
 source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Create .env file
+# Create environment file
 cp .env.example .env
 ```
 
 **Edit `backend/.env`:**
 ```env
-# Required
-OPENROUTER_API_KEY=your_key_here
+# Required - Get from https://console.groq.com
+GROQ_API_KEY=gsk_your_key_here
 
 # Admin Access
 ADMIN_API_KEY=admin123
 
-# OCR Configuration (Update matching your installation paths)
+# OCR Configuration (Update paths)
 POPPLER_PATH="C:\Program Files\poppler-25.12.0\Library\bin"
 TESSERACT_CMD="C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-# Optional
+# Optional - LLM Observability
 LANGFUSE_ENABLED=false
+LANGFUSE_PUBLIC_KEY=pk-lf-xxx
+LANGFUSE_SECRET_KEY=sk-lf-xxx
+
+# Application
 ENVIRONMENT=development
 LOG_LEVEL=INFO
 ```
 
 ### Step 3: Build Vector Database
 ```bash
-# Build ChromaDB from CUAD dataset (one-time setup)
 python build_pipeline/build_vector_db.py
 ```
 
 **Expected output:**
 ```
 🗃️  INITIALIZING GOLDEN STANDARD DATABASE...
+    Safe clauses: D:\Projects\legality_ai\backend\data\verified_golden_rules.json
+    Risky clauses: D:\Projects\legality_ai\backend\data\extracted_clauses.json
     Loaded 533 safe clauses.
     Loaded 107 risky clauses.
     Indexing 640 total documents...
@@ -199,13 +385,10 @@ python build_pipeline/build_vector_db.py
 
 ### Step 4: Frontend Setup
 ```bash
-# Navigate to frontend
 cd ../frontend
 
-# Install dependencies
 npm install
 
-# Create .env file
 cp .env.example .env
 ```
 
@@ -224,26 +407,118 @@ REACT_APP_ENV=development
 cd backend
 python run.py
 ```
+Backend runs at `http://localhost:8000`
 
 ### Start Frontend
 ```bash
 cd frontend
 npm start
 ```
+Frontend runs at `http://localhost:3000`
 
 ### Admin Access
 1. Navigate to `http://localhost:3000/admin`
-2. Enter the Admin Key (Default: `admin123`, configurable in `backend/.env`)
-3. Review and sync clauses to update the AI's intelligence!
+2. Enter the Admin Key (Default: `admin123`)
+3. Review user feedback and sync approved corrections
+
+---
+
+## 📡 API Reference
+
+### Analysis Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/analyze/upload` | Upload PDF for analysis |
+| `GET` | `/analyze/{id}/status` | Check analysis status |
+| `GET` | `/analyze/{id}/results` | Get analysis results |
+
+### Feedback Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/feedback/` | Submit user feedback |
+
+### Admin Endpoints (Requires `x-api-key` header)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/admin/feedback` | Get all feedback entries |
+| `PATCH` | `/admin/feedback/{id}/status` | Update feedback status |
+| `POST` | `/admin/feedback/sync-batch` | Sync approved to ChromaDB |
+| `GET` | `/admin/export/csv` | Export data as CSV |
+
+---
+
+## ⚙️ Configuration
+
+### LLM Models (settings.py)
+```python
+class LLMConfig:
+    MODELS = {
+        "fast": ["llama-3.1-8b-instant", "mixtral-8x7b-32768"],
+        "smart": ["llama-3.3-70b-versatile"],
+        "structured": ["llama-3.3-70b-versatile"]
+    }
+```
+
+### RAG Thresholds
+```python
+class RAGThresholds:
+    NOISE_THRESHOLD = 0.44      # Below = irrelevant
+    SAFE_THRESHOLD = 0.85       # Above = auto-safe
+```
+
+### Target Categories
+```python
+TARGET_CATEGORIES = [
+    "Unilateral Termination",
+    "Unlimited Liability",
+    "Non-Compete"
+]
+```
+
+---
+
+## 🏭 Data Pipeline (build_pipeline/)
+
+The project includes a sophisticated data factory for generating and validating training data:
+
+| Script | Purpose |
+|--------|---------|
+| `cuad_extract.py` | Extracts risky clauses from CUAD dataset |
+| `generator_agent.py` | Generates 5 safe variations per risky clause |
+| `nli_validator.py` | Validates safety using DeBERTa NLI model |
+| `build_vector_db.py` | Builds ChromaDB from validated data |
+| `run.py` | Orchestrates the full pipeline |
+
+**Run the full pipeline:**
+```bash
+python build_pipeline/run.py --limit 10  # Process 10 samples
+```
+
+---
+
+## 🔒 Security Features
+
+- **Admin Authentication**: All admin endpoints require `x-api-key` header
+- **Double Authentication**: Batch sync requires secondary key confirmation
+- **Cost Safeguards**: Pre-flight token estimation prevents unaffordable requests
+- **Model Fallback**: Automatic failover to backup models on errors
+- **Rate Limit Handling**: Automatic retry with exponential backoff
 
 ---
 
 ## 👨‍💻 Contributors
 
-**Yashwanth N** 
-      &
-**Divya Yadav**
+**Yashwanth N** & **Divya Yadav**
 
 ---
 
-**Built with ❤️ as a portfolio project showcasing AI Multi-Agent systems and production-grade software engineering.**
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+**Built with ❤️ as a portfolio project showcasing AI Multi-Agent systems, RAG pipelines, and production-grade software engineering.**

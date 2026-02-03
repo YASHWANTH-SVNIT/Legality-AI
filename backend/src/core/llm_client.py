@@ -13,6 +13,10 @@ logger = logging.getLogger(__name__)
 
 T = TypeVar('T', bound=BaseModel)
 
+class InsufficientCreditsError(Exception):
+    """Raised when the request exceeds the affordable token budget."""
+    pass
+
 class LLMClient:
     
     def __init__(self):
@@ -35,6 +39,7 @@ class LLMClient:
         
         self.call_count = 0
         self.total_cost = 0.0
+        self.affordable_tokens = 10000 # Jury-level safeguard budget
     
     @observe(name="LLM Call")
     def get_completion(
@@ -42,9 +47,20 @@ class LLMClient:
         messages: List[Dict[str, str]],
         model_type: str = "fast",
         temperature: float = 0.3,
-        max_tokens: int = 1000
+        max_tokens: int = 800
     ) -> str:
         
+        # --- PRE-FLIGHT CHECK (Jury-Level) ---
+        estimated_prompt_tokens = sum(len(m.get("content", "")) for m in messages) // 3
+        total_estimated = estimated_prompt_tokens + max_tokens
+        
+        if total_estimated > self.affordable_tokens:
+            raise InsufficientCreditsError(
+                f"Request requires ~{total_estimated} tokens, which exceeds limit of {self.affordable_tokens}. "
+                "Reduce max_tokens or top up credits."
+            )
+        # ------------------------------------
+
         models = LLMConfig.MODELS.get(model_type, LLMConfig.MODELS["fast"])
         last_error = None
         
@@ -61,13 +77,21 @@ class LLMClient:
                 )
                 
                 self.call_count += 1
-                content = response.choices[0].message.content
-                
-                logger.debug(f"✅ Success with {model}")
-                return content
+                if response.choices and response.choices[0].message.content:
+                    content = response.choices[0].message.content
+                    logger.debug(f"✅ Success with {model}")
+                    return content
+                else:
+                    raise Exception("Empty response from LLM")
                 
             except Exception as e:
-                if "429" in str(e) or "rate" in str(e).lower():
+                err_str = str(e).lower()
+                # Stop retrying on cost/access issues
+                if "402" in err_str or "payment" in err_str or "insufficient" in err_str:
+                     logger.critical(f"💰 {model} PAYMENT REQUIRED: {e}")
+                     raise InsufficientCreditsError(str(e))
+                     
+                if "429" in err_str or "rate" in err_str:
                     logger.warning(f"⚠️ Rate limit on {model}, waiting...")
                     time.sleep(LLMConfig.RETRY_DELAY)
                     last_error = e

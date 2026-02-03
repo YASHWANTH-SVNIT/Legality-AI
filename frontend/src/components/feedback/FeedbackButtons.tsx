@@ -71,21 +71,22 @@ const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({ clause, analysisId })
           <button
             onClick={() => handleFeedback('false-positive')}
             disabled={loading}
-            className="px-4 py-2 text-xs font-bold bg-white hover:bg-gray-100 text-gray-700 rounded-lg border border-gray-300 shadow-sm disabled:opacity-50 transition-all active:scale-95"
+            className="px-4 py-2 text-xs font-black uppercase tracking-widest bg-transparent hover:bg-gray-100 text-gray-500 hover:text-gray-900 rounded-lg border-2 border-gray-200 hover:border-gray-400 shadow-sm disabled:opacity-50 transition-all active:scale-95"
           >
-            Not Risky
+            🛡️ Not Risky
           </button>
+          <div className="h-8 w-px bg-gray-200 mx-2"></div>
           <button
             onClick={() => handleFeedback('approve-fix', true)}
             disabled={loading}
-            className="px-4 py-2 text-xs font-bold bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-sm disabled:opacity-50 transition-all active:scale-95"
+            className="px-4 py-2 text-xs font-black uppercase tracking-widest bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 rounded-lg border border-emerald-200 shadow-sm disabled:opacity-50 transition-all active:scale-95"
           >
             👍 Good Fix
           </button>
           <button
             onClick={() => handleFeedback('approve-fix', false)}
             disabled={loading}
-            className="px-4 py-2 text-xs font-bold bg-red-50 hover:bg-red-100 text-red-700 rounded-lg border border-red-300 shadow-sm disabled:opacity-50 transition-all active:scale-95"
+            className="px-4 py-2 text-xs font-black uppercase tracking-widest bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-800 rounded-lg border border-rose-200 shadow-sm disabled:opacity-50 transition-all active:scale-95"
           >
             👎 Bad Fix
           </button>

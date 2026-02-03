@@ -48,8 +48,20 @@ const FeedbackTable = () => {
         (f.status === 'pending' || !f.status) && f.feedback_type === 'false-positive'
     );
 
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    const now = new Date().getTime();
+
+    const fixReviews = feedback.filter(f => {
+        const isFixReview = (f.status === 'pending' || !f.status) && f.feedback_type === 'approve-fix';
+        if (!isFixReview) return false;
+
+        // Auto-archive/hide if older than 30 days
+        const feedbackTime = new Date(f.timestamp).getTime();
+        return (now - feedbackTime) < THIRTY_DAYS_MS;
+    });
+
     const approvedSuggestions = feedback.filter(f =>
-        f.status === 'approved' && f.feedback_type === 'false-positive'
+        f.status === 'approved'
     );
 
     if (loading) return (
@@ -60,6 +72,15 @@ const FeedbackTable = () => {
     );
 
     const FeedbackCard = ({ f, isApproved = false }: { f: any, isApproved?: boolean }) => {
+        let typeBadge = null;
+        if (f.feedback_type === 'false-positive') {
+            typeBadge = <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-black uppercase tracking-widest">🛡️ Not Risky</span>;
+        } else if (f.approved === 1 || f.approved === true) {
+            typeBadge = <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-black uppercase tracking-widest">👍 Good Fix</span>;
+        } else {
+            typeBadge = <span className="px-3 py-1 bg-rose-100 text-rose-700 rounded-lg text-xs font-black uppercase tracking-widest">👎 Bad Fix</span>;
+        }
+
         return (
             <div className={`bg-white rounded-2xl border ${isApproved ? 'border-green-100' : 'border-gray-100'} shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md`}>
                 <div className="p-6">
@@ -68,32 +89,37 @@ const FeedbackTable = () => {
                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                                 {new Date(f.timestamp).toLocaleDateString()}
                             </span>
-                            <span className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-tight ${isApproved ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-800'}`}>
+                            <span className="px-3 py-1 bg-indigo-50 text-indigo-900 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-100">
                                 {f.category}
                             </span>
+                            {typeBadge}
                         </div>
                         <div className="flex gap-2">
-                            {!isApproved ? (
+                            {/* Hide Action Buttons for Fix Reviews (View Only) */}
+                            {f.feedback_type !== 'approve-fix' && !isApproved && (
                                 <>
                                     <button
                                         onClick={() => handleUpdateStatus(f.id, 'approved')}
                                         className="px-4 py-2 bg-emerald-500 text-white text-[11px] font-black rounded-xl shadow-md shadow-emerald-200 hover:bg-emerald-600 transition-all active:scale-95"
                                     >
-                                        APPROVE
+                                        ACKNOWLEDGE
                                     </button>
                                     <button
                                         onClick={() => handleUpdateStatus(f.id, 'rejected')}
                                         className="px-4 py-2 bg-white text-rose-500 text-[11px] font-black rounded-xl border border-rose-100 hover:bg-rose-50 transition-all active:scale-95"
                                     >
-                                        REJECT
+                                        IGNORE
                                     </button>
                                 </>
-                            ) : (
+                            )}
+
+                            {/* Show Reset for Approved items */}
+                            {isApproved && (
                                 <button
                                     onClick={() => handleUpdateStatus(f.id, 'pending')}
                                     className="px-4 py-2 bg-white text-gray-500 text-[11px] font-black rounded-xl border border-gray-100 hover:bg-gray-50 transition-all active:scale-95"
                                 >
-                                    REMOVE FROM SYNC
+                                    RESET
                                 </button>
                             )}
                         </div>
@@ -103,21 +129,29 @@ const FeedbackTable = () => {
                         <div className="relative">
                             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Clause Content</h4>
                             <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 max-h-24 overflow-hidden">
-                                <p className="text-gray-700 leading-relaxed font-medium">
+                                <p className="text-gray-700 leading-relaxed font-medium text-xs">
                                     {f.clause_text}
                                 </p>
                             </div>
-                            {f.clause_text.length > 150 && (
-                                <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none"></div>
-                            )}
                         </div>
+
+                        {f.feedback_type === 'approve-fix' && (
+                            <div className="relative">
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Suggested Fix</h4>
+                                <div className={`p-4 rounded-xl border ${f.approved ? 'bg-emerald-50 border-emerald-100 text-emerald-900' : 'bg-rose-50 border-rose-100 text-rose-900'} max-h-24 overflow-hidden`}>
+                                    <p className="leading-relaxed font-bold text-xs">
+                                        {f.suggested_fix}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="flex justify-between items-end pt-2">
                             <div className="flex-1 mr-4">
                                 <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">User Comment</h4>
-                                <div className="bg-indigo-50/30 p-3 rounded-xl border border-indigo-100/50">
-                                    <p className="text-sm text-indigo-900 leading-relaxed italic">
-                                        {f.user_comment || "No comment provided by user."}
+                                <div className="bg-white p-3 rounded-xl border border-gray-100">
+                                    <p className="text-sm text-gray-600 leading-relaxed italic">
+                                        {f.user_comment || "No comment provided."}
                                     </p>
                                 </div>
                             </div>
@@ -125,7 +159,7 @@ const FeedbackTable = () => {
                                 onClick={() => setSelectedFeedback(f)}
                                 className="text-indigo-600 font-bold text-[11px] uppercase tracking-widest hover:text-indigo-800 transition-colors py-2 px-4 bg-indigo-50 rounded-lg"
                             >
-                                View Full Card
+                                Deep Dive
                             </button>
                         </div>
                     </div>
@@ -139,20 +173,19 @@ const FeedbackTable = () => {
             {/* Header Section */}
             <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-50">
                 <h2 className="text-3xl font-black text-gray-900 tracking-tighter">Legal Feedback Review</h2>
-                <p className="text-gray-500 mt-2 font-medium">Finalize user suggestions and update the RAG Knowledge Base.</p>
+                <p className="text-gray-500 mt-2 font-medium">Review false positives and quality ratings for AI-generated fixes.</p>
             </div>
 
-            {/* Section 1: Pending Reviews */}
+            {/* Section 1: False Positive Claims */}
             <div className="space-y-6">
                 <div className="flex items-center gap-3 px-2">
                     <div className="h-6 w-1.5 bg-amber-500 rounded-full"></div>
-                    <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">Pending Reviews ({pendingReview.length})</h3>
+                    <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">Reported as "Not Risky" ({pendingReview.length})</h3>
                 </div>
 
                 {pendingReview.length === 0 ? (
-                    <div className="bg-white rounded-[2rem] border border-dashed border-gray-200 p-20 text-center">
-                        <span className="text-4xl mb-4 block">⚖️</span>
-                        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">All clear! No pending reviews.</p>
+                    <div className="bg-white rounded-[2rem] border border-dashed border-gray-200 p-10 text-center">
+                        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No pending false positive reports.</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 gap-6">
@@ -163,12 +196,32 @@ const FeedbackTable = () => {
                 )}
             </div>
 
-            {/* Section 2: Approved Suggestions */}
+            {/* Section 2: Fix Quality Reviews */}
+            <div className="space-y-6">
+                <div className="flex items-center gap-3 px-2">
+                    <div className="h-6 w-1.5 bg-indigo-500 rounded-full"></div>
+                    <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">Fix Quality Reviews ({fixReviews.length})</h3>
+                </div>
+
+                {fixReviews.length === 0 ? (
+                    <div className="bg-white rounded-[2rem] border border-dashed border-gray-200 p-10 text-center">
+                        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No pending fix reviews.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 gap-6">
+                        {fixReviews.map((f) => (
+                            <FeedbackCard key={f.id} f={f} />
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Section 3: Processed/Approved */}
             <div className="space-y-6">
                 <div className="flex justify-between items-center px-2">
                     <div className="flex items-center gap-3">
                         <div className="h-6 w-1.5 bg-emerald-500 rounded-full"></div>
-                        <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">Approved Suggestions ({approvedSuggestions.length})</h3>
+                        <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">Acknowledged / Approved ({approvedSuggestions.length})</h3>
                     </div>
                     {approvedSuggestions.length > 0 && (
                         <button
@@ -181,8 +234,8 @@ const FeedbackTable = () => {
                 </div>
 
                 {approvedSuggestions.length === 0 ? (
-                    <div className="bg-gray-50/50 rounded-[2rem] border border-gray-100 p-16 text-center">
-                        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No clauses ready for vector sync yet.</p>
+                    <div className="bg-gray-50/50 rounded-[2rem] border border-gray-100 p-10 text-center">
+                        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">History is empty.</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 gap-4">
