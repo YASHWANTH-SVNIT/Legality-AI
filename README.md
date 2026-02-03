@@ -34,6 +34,7 @@ Legality AI analyzes legal contracts using a sophisticated pipeline powered by m
 
 ### Core Analysis
 - **📄 PDF Contract Analysis** - Upload and process legal contracts in PDF format
+- **📷 OCR for Scanned Documents** - Intelligent fallback that automatically detects scanned PDFs and uses Tesseract OCR to extract text
 - **🤖 Adversarial AI Agents** - 3-agent system (**Pessimist, Optimist, Arbiter**) for a balanced "Debate Loop" risk assessment
 - **🔍 RAG-Powered Detection** - Semantic search against 640+ verified legal clauses from the CUAD dataset
 - **✍️ AI-Generated Fixes** - Automatically suggests safer alternative clauses that balance interests
@@ -58,7 +59,8 @@ Legality AI analyzes legal contracts using a sophisticated pipeline powered by m
 - **ChromaDB** - Vector database for RAG and "Gold Standard" knowledge base
 - **Sentence Transformers** - Embedding generation (all-MiniLM-L6-v2)
 - **OpenRouter API** - Multi-model LLM access (Claude-3, GPT-4o, etc.) with automatic fallback
-- **PyPDF2** - PDF text extraction
+- **PyPDF2 & PDFPlumber** - Hybrid PDF text extraction
+- **Tesseract OCR & Poppler** - Optical Character Recognition for scanned documents
 
 ### Frontend
 - **React 18.2** - UI framework
@@ -94,6 +96,7 @@ legality_ai/
 │   │   │
 │   │   ├── services/               # Business logic
 │   │   │   ├── document_processor/ # PDF extraction & chunking
+│   │   │   │   └── pdf_processor.py # Intelligent OCR Fallback Logic
 │   │   │   ├── risk_analyzer/      # Adversarial "Debate Loop" logic
 │   │   │   ├── fix_generator/      # Counter-clause generation
 │   │   │   ├── feedback_manager/   # SQLite persistence & batch sync
@@ -124,25 +127,95 @@ legality_ai/
 
 ---
 
-## 🔄 How It Works
+## 🚀 Installation & Setup
 
-### Stage 1: Document Processing
-- Splits PDF into coherent chunks using semantic markers.
-- Extracts metadata (parties, dates) and defined terms to improve context for the LLM.
+### Prerequisites
 
-### Stage 2: RAG Filtering
-- Compares each chunk against a database of 640+ legal standards.
-- Uses a "courtroom" threshold to filter noise and focus only on legally ambiguous text.
+- **Python 3.11+**
+- **Node.js 18+** & npm
+- **OpenRouter API Key** 
+- **Git**
+- **OCR Tools (Required for Scanned PDFs)**:
+    - **Tesseract OCR**: Install from [UB-Mannheim/tesseract](https://github.com/UB-Mannheim/tesseract/wiki)
+    - **Poppler**: Install from [oschwartz10612/poppler-windows](https://github.com/oschwartz10612/poppler-windows/releases/)
 
-### Stage 3: The Adversarial Debate Loop
-- **Pessimist Agent**: Scrutinizes for maximal risk and hidden liabilities.
-- **Optimist Agent**: Argues for business necessity and standard commercial context.
-- **Arbiter Agent**: Evaluates both "testimonies" to assign a final, balanced risk score.
+### Step 1: Clone Repository
+```bash
+git clone https://github.com/YASHWANTH-SVNIT/legality_ai.git
+cd legality_ai
+```
 
-### Stage 4: Admin Improvement Loop (RAG 2.0)
-1. **User Feedback**: Users flag false positives or approve fixes.
-2. **Review**: Admins use the portal to deep-dive into the AI's logic (viewing the debate data).
-3. **Knowledge Base Sync**: Verified safe clauses are moved from SQLite to ChromaDB, updating the system's "Gold Standard" knowledge base in real-time.
+### Step 2: Backend Setup
+```bash
+# Navigate to backend
+cd backend
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Create .env file
+cp .env.example .env
+```
+
+**Edit `backend/.env`:**
+```env
+# Required
+OPENROUTER_API_KEY=your_key_here
+
+# Admin Access
+ADMIN_API_KEY=admin123
+
+# OCR Configuration (Update matching your installation paths)
+POPPLER_PATH="C:\Program Files\poppler-25.12.0\Library\bin"
+TESSERACT_CMD="C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+# Optional
+LANGFUSE_ENABLED=false
+ENVIRONMENT=development
+LOG_LEVEL=INFO
+```
+
+### Step 3: Build Vector Database
+```bash
+# Build ChromaDB from CUAD dataset (one-time setup)
+python build_pipeline/build_vector_db.py
+```
+
+**Expected output:**
+```
+🗃️  INITIALIZING GOLDEN STANDARD DATABASE...
+    Loaded 533 safe clauses.
+    Loaded 107 risky clauses.
+    Indexing 640 total documents...
+✅ SUCCESS! Vector DB created
+```
+
+### Step 4: Frontend Setup
+```bash
+# Navigate to frontend
+cd ../frontend
+
+# Install dependencies
+npm install
+
+# Create .env file
+cp .env.example .env
+```
+
+**Edit `frontend/.env`:**
+```env
+REACT_APP_API_URL=http://localhost:8000
+REACT_APP_ENV=development
+```
 
 ---
 

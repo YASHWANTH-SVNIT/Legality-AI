@@ -60,11 +60,10 @@ const FileUploader: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto">
       <div
-        className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
-          isDragging
+        className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${isDragging
             ? 'border-blue-500 bg-blue-50'
             : 'border-gray-300 hover:border-gray-400'
-        }`}
+          }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
@@ -101,19 +100,32 @@ const FileUploader: React.FC = () => {
             </div>
           )}
 
-          <input
-            type="file"
-            accept=".pdf"
-            onChange={handleFileInput}
-            className="hidden"
-            id="file-upload"
-          />
-          <label
-            htmlFor="file-upload"
-            className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors"
-          >
-            Select PDF
-          </label>
+          {file ? (
+            <div className="py-2">
+              <button
+                onClick={() => { setFile(null); setError(null); }}
+                className="text-xs text-red-500 font-bold uppercase tracking-widest hover:text-red-600 transition-colors"
+              >
+                Remove File
+              </button>
+            </div>
+          ) : (
+            <>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={handleFileInput}
+                className="hidden"
+                id="file-upload"
+              />
+              <label
+                htmlFor="file-upload"
+                className="inline-block px-8 py-4 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 cursor-pointer transition-all active:scale-95 shadow-lg shadow-indigo-200 font-bold uppercase tracking-widest text-xs"
+              >
+                Select Contract PDF
+              </label>
+            </>
+          )}
         </div>
       </div>
 

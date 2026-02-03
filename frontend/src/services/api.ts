@@ -13,6 +13,15 @@ const getAdminHeaders = () => ({
   'x-api-key': localStorage.getItem('adminKey') || 'admin123'
 });
 
+export const checkHealth = async () => {
+  try {
+    const res = await api.get('/');
+    return res.status === 200;
+  } catch (e) {
+    return false;
+  }
+};
+
 export const uploadContract = async (file: File) => {
   const formData = new FormData();
   formData.append('file', file);
