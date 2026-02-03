@@ -213,7 +213,6 @@ This system is a **specialized prototype** focusing on **3 High-Impact Categorie
 | **CategoryDetector** | RAG-based semantic category matching |
 | **AdversarialAnalyzer** | 3-agent debate loop orchestration |
 | **FixGenerator** | Counter-clause generation with style matching |
-| **CompoundRiskDetector** | Multi-clause interaction analysis |
 
 ---
 
@@ -418,37 +417,11 @@ Frontend runs at `http://localhost:3000`
 
 ### Admin Access
 1. Navigate to `http://localhost:3000/admin`
-2. Enter the Admin Key (Default: `admin123`)
+2. Enter the Admin Key
 3. Review user feedback and sync approved corrections
 
 ---
 
-## 📡 API Reference
-
-### Analysis Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/analyze/upload` | Upload PDF for analysis |
-| `GET` | `/analyze/{id}/status` | Check analysis status |
-| `GET` | `/analyze/{id}/results` | Get analysis results |
-
-### Feedback Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/feedback/` | Submit user feedback |
-
-### Admin Endpoints (Requires `x-api-key` header)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/admin/feedback` | Get all feedback entries |
-| `PATCH` | `/admin/feedback/{id}/status` | Update feedback status |
-| `POST` | `/admin/feedback/sync-batch` | Sync approved to ChromaDB |
-| `GET` | `/admin/export/csv` | Export data as CSV |
-
----
 
 ## ⚙️ Configuration
 
@@ -476,25 +449,6 @@ TARGET_CATEGORIES = [
     "Unlimited Liability",
     "Non-Compete"
 ]
-```
-
----
-
-## 🏭 Data Pipeline (build_pipeline/)
-
-The project includes a sophisticated data factory for generating and validating training data:
-
-| Script | Purpose |
-|--------|---------|
-| `cuad_extract.py` | Extracts risky clauses from CUAD dataset |
-| `generator_agent.py` | Generates 5 safe variations per risky clause |
-| `nli_validator.py` | Validates safety using DeBERTa NLI model |
-| `build_vector_db.py` | Builds ChromaDB from validated data |
-| `run.py` | Orchestrates the full pipeline |
-
-**Run the full pipeline:**
-```bash
-python build_pipeline/run.py --limit 10  # Process 10 samples
 ```
 
 ---
