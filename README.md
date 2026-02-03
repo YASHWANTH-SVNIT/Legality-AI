@@ -46,8 +46,6 @@ Legality AI analyzes legal contracts using a sophisticated pipeline powered by m
 - **🗂️ Card-Based Review System** - Intuitive interface to approve or reject user-flagged safe/risky clauses
 - **🧐 Analysis Deep-Dive** - Complete transparency: view the exact Pessimist argument, Optimist defense, and Arbiter reasoning for every flagged clause
 - **⚡ Batch Vector Sync** - Admins can sync approved user suggestions to the vector database in bulk, requiring re-authentication for security
-- **📥 CSV Data Export** - Download complete feedback datasets for offline auditing or model fine-tuning
-
 ---
 
 ## 🛠 Tech Stack
