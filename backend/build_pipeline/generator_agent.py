@@ -4,15 +4,19 @@ import json
 import time
 from dotenv import load_dotenv
 
-load_dotenv()
+# Point to backend/.env specifically
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # backend/
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+load_dotenv(ENV_PATH)
+
 API_KEY = os.getenv("OPENROUTER_API_KEY")
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 MODELS_TO_TRY = [
-    "meta-llama/llama-3.1-70b-instruct:free",  
-    "google/gemini-2.0-flash-exp:free",      
-    "meta-llama/llama-4-maverick",
-    "huggingfaceh4/zephyr-7b-beta:free"      
+    "google/gemini-2.0-flash-exp:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "meta-llama/llama-3.2-3b-instruct:free", 
+    "qwen/qwen-2.5-coder-32b-instruct:free"
 ]
 
 def generate_safe_variations(risky_text, category, feedback=""):
@@ -85,11 +89,21 @@ def generate_safe_variations(risky_text, category, feedback=""):
                         if isinstance(variations, list) and len(variations) >= 3:
                             return variations
                     except json.JSONDecodeError:
+                        print(f"      [DEBUG] JSON Parse Error: {content[:50]}...")
                         continue 
+                else:
+                    print(f"      [DEBUG] No JSON found in response: {content[:100]}...")
+            else:
+                try:
+                    error_json = resp.json()
+                    print(f"      [DEBUG] API Error ({resp.status_code}): {json.dumps(error_json)}")
+                except:
+                    print(f"      [DEBUG] API Error ({resp.status_code}): {resp.text}")
             
             time.sleep(1)
             
-        except Exception:
+        except Exception as e:
+            print(f"      [DEBUG] Error with {model_name}: {str(e)}")
             continue
             
     return []

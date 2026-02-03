@@ -6,7 +6,10 @@ from tqdm import tqdm
 from dotenv import load_dotenv
 
 # Load Environment Variables
-load_dotenv()
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+load_dotenv(ENV_PATH)
+
 API_KEY = os.getenv("OPENROUTER_API_KEY")
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
@@ -124,7 +127,13 @@ def extract_candidates(file_path):
                             })
     return candidates
 
-def load_cuad(file_path="./data/raw_datasets/CUAD_v1.json"):
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # Points to backend/
+RAW_DATA_PATH = os.path.join(BASE_DIR, "data", "raw_datasets", "CUAD_v1.json")
+
+def load_cuad(file_path=None):
+    if file_path is None:
+        file_path = RAW_DATA_PATH
+    
     # 1. Get ALL Candidates
     raw_candidates = extract_candidates(file_path)
     

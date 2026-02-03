@@ -4,7 +4,8 @@ import numpy as np
 from sentence_transformers import CrossEncoder
 
 
-DATA_PATH = "./data/golden_benchmark.json"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # Points to backend/
+DATA_PATH = os.path.join(BASE_DIR, "data", "golden_benchmark.json")
 
 CATEGORY_MAP = {
     "Unilateral Termination": "Termination for Convenience",

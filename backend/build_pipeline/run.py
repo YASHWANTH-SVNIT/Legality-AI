@@ -2,17 +2,25 @@ import sys
 import os
 import json
 import time
+import argparse
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add backend directory to path so absolute imports work
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 
 from build_pipeline.cuad_extract import load_cuad
 from build_pipeline.generator_agent import generate_safe_variations
 from build_pipeline.nli_validator import validate_safety
 
-INPUT_CACHE_PATH = "./data/extracted_clauses.json"
-OUTPUT_FILE = "./data/verified_golden_rules.json"
+DATA_DIR = os.path.join(BASE_DIR, "data")
+INPUT_CACHE_PATH = os.path.join(DATA_DIR, "extracted_clauses.json")
+OUTPUT_FILE = os.path.join(DATA_DIR, "verified_golden_rules.json")
 
 def main():
+    parser = argparse.ArgumentParser(description="Legal AI Data Factory Runner")
+    parser.add_argument("--limit", type=int, default=None, help="Limit number of samples to process (for testing)")
+    args = parser.parse_args()
+
     print("\n🚀 STARTING LEGAL AI DATA FACTORY (Multi-Variation Mode)")
     print("=======================================================")
 
@@ -23,9 +31,14 @@ def main():
         with open(INPUT_CACHE_PATH, "r") as f:
             risky_samples = json.load(f)
     else:
+        print("   ⚠️ Cache not found, attempting to load from raw CUAD...")
         risky_samples = load_cuad() 
     
     print(f"   Found {len(risky_samples)} risky samples to process.")
+    
+    if args.limit:
+        risky_samples = risky_samples[:args.limit]
+        print(f"   ⚠️ LIMITING run to first {args.limit} samples.")
 
     print("\n🔹 [Step 2] Running Generation & Validation Factory...")
     print("   (Generating 5 variations per risk -> Validating individually)")
@@ -48,7 +61,7 @@ def main():
             drafts = generate_safe_variations(risky_text, category, feedback)
             
             if not drafts:
-                print("      ⚠️ Generation Error (API issue). Retrying...")
+                print("      ⚠️ Generation Error (API issue or empty). Retrying...")
                 current_try += 1
                 continue
 
@@ -86,7 +99,11 @@ def main():
         if not success_for_this_sample:
             print("      ⚠️ SKIPPING. Could not generate any safe version after 3 retries.")
 
+    # Ensure output directory exists
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
+    
+    # If using limit, maybe we append? For now let's overwrite for simplicity 
+    # as this is usually a full build script
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(verified_pairs, f, indent=2)
 

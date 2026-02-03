@@ -4,9 +4,12 @@ import chromadb
 from chromadb.utils import embedding_functions
 
 # --- CONFIGURATION ---
-INPUT_FILE = "./data/verified_golden_rules.json"
-RISKY_INPUT = "./data/extracted_clauses.json"  
-DB_PATH = "./chroma_db_gold"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # Points to backend/
+DATA_DIR = os.path.join(BASE_DIR, "data")
+
+INPUT_FILE = os.path.join(DATA_DIR, "verified_golden_rules.json")
+RISKY_INPUT = os.path.join(DATA_DIR, "extracted_clauses.json")
+DB_PATH = os.path.join(BASE_DIR, "chroma_db_gold")
 COLLECTION_NAME = "legal_gold_standards"
 
 def build_database():
