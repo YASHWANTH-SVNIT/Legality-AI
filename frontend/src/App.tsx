@@ -38,7 +38,7 @@ function App() {
             <div className="mx-auto w-24 h-24 mb-8 relative">
               <div className="w-full h-full border-4 border-indigo-100 rounded-full"></div>
               <div className="absolute top-0 left-0 w-full h-full border-4 border-indigo-600 rounded-full animate-spin border-t-transparent"></div>
-              <span className="absolute inset-0 flex items-center justify-center text-3xl">🤖</span>
+              <span className="absolute inset-0 flex items-center justify-center text-3xl">⚖️</span>
             </div>
 
             <h1 className="text-3xl font-black text-gray-900 mb-2 tracking-tight">Legality AI</h1>

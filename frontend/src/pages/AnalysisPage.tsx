@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAnalysis } from '../hooks/useAnalysis';
 import RiskSummary from '../components/risk/RiskSummary';
@@ -9,6 +9,7 @@ const AnalysisPage: React.FC = () => {
   const { analysisId } = useParams<{ analysisId: string }>();
   const navigate = useNavigate();
   const { status, results, error } = useAnalysis(analysisId!);
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
 
   if (error) {
     return (
@@ -55,9 +56,18 @@ const AnalysisPage: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50/50">
-      <div className="bg-amber-100 border-b border-amber-200 text-amber-900/80 px-4 py-2 text-[10px] font-bold text-center uppercase tracking-widest">
-        ⚠️ AI-generated analysis. Not a substitute for professional legal counsel.
-      </div>
+      {showDisclaimer && (
+        <div className="bg-amber-100 border-b border-amber-200 text-amber-900/80 px-4 py-2 text-[10px] font-bold text-center uppercase tracking-widest relative">
+          ⚠️ AI-generated analysis. Not a substitute for professional legal counsel.
+          <button
+            onClick={() => setShowDisclaimer(false)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center hover:bg-amber-200 rounded-full transition-colors group"
+            aria-label="Close disclaimer"
+          >
+            <span className="text-amber-900/60 group-hover:text-amber-900 text-lg leading-none">×</span>
+          </button>
+        </div>
+      )}
 
       <div className="flex-grow py-12 px-4">
         <div className="max-w-6xl mx-auto">
