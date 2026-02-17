@@ -25,6 +25,11 @@ if not os.path.exists(DB_PATH):
         # We don't exit, as the app might still run partially or for other reasons
 
 from src.api.routes import analysis, feedback, health, admin
+from src.database import init_database
+
+# Initialize Database Schema (SQLite)
+print("🗄️ Initializing SQLite Database...")
+init_database()
 
 # Create a new app for Hugging Face deployment
 app = FastAPI(
