@@ -15,6 +15,9 @@ const Footer: React.FC = () => {
                         <button className="text-gray-400 hover:text-indigo-600 transition-colors text-xs font-bold uppercase tracking-widest bg-transparent border-none cursor-pointer">
                             Terms
                         </button>
+                        <a href="/admin" className="text-gray-400 hover:text-indigo-600 transition-colors text-xs font-bold uppercase tracking-widest no-underline">
+                            Admin
+                        </a>
                         <a href="https://github.com/YASHWANTH-SVNIT/legality_ai" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors">
                             <span className="sr-only">GitHub</span>
                             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
