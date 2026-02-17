@@ -43,24 +43,30 @@ class RAGThresholds:
 
     PARAM_MISMATCH_THRESHOLD = 0.20  
 
-# LLM CONFIGURATION (Groq)
+# LLM CONFIGURATION (Primary + Fallback)
 class LLMConfig:
-    # Using Groq for 10x speed + low cost
+    # 1. PRIMARY PROVIDER (Groq - Speed)
     API_KEY = os.getenv("GROQ_API_KEY") 
     BASE_URL = "https://api.groq.com/openai/v1"
     
     MODELS = {
-        # High speed logic summaries / formatting
         "fast": ["llama-3.1-8b-instant", "mixtral-8x7b-32768"],
-        
-        # Deep reasoning (The Debate Loop)
         "smart": ["llama-3.3-70b-versatile"],  
-        
-        # JSON enforcement
-        "structured": ["llama-3.3-70b-versatile"]
+        "structured": ["llama-3.1-8b-instant"] 
     }
     
-    MAX_RETRIES = 3
+    # 2. FALLBACK PROVIDER (OpenRouter - Reliability)
+    ENABLE_FALLBACK = True
+    FALLBACK_API_KEY = os.getenv("OPENROUTER_API_KEY")
+    FALLBACK_BASE_URL = "https://openrouter.ai/api/v1"
+    
+    FALLBACK_MODELS = {
+        "fast": ["openai/gpt-4o-mini", "meta-llama/llama-3.1-8b-instruct"],
+        "smart": ["openai/gpt-4o-mini", "anthropic/claude-3.5-sonnet"],
+        "structured": ["openai/gpt-4o-mini"]
+    }
+    
+    MAX_RETRIES = 2
     RETRY_DELAY = 1
     TIMEOUT = 30
 

@@ -20,10 +20,20 @@ class InsufficientCreditsError(Exception):
 class LLMClient:
     
     def __init__(self):
+        # Primary Client (Groq)
         self.client = openai.OpenAI(
             base_url=LLMConfig.BASE_URL,
             api_key=LLMConfig.API_KEY,
         )
+        
+        # Fallback Client (OpenRouter)
+        self.fallback_client = None
+        if LLMConfig.ENABLE_FALLBACK and LLMConfig.FALLBACK_API_KEY:
+            self.fallback_client = openai.OpenAI(
+                base_url=LLMConfig.FALLBACK_BASE_URL,
+                api_key=LLMConfig.FALLBACK_API_KEY,
+            )
+            logger.info("🛡️ Fallback client initialized (OpenRouter)")
         
         self.langfuse = None
         if LangfuseConfig.ENABLED and LangfuseConfig.PUBLIC_KEY:
@@ -39,7 +49,7 @@ class LLMClient:
         
         self.call_count = 0
         self.total_cost = 0.0
-        self.affordable_tokens = 10000 # Jury-level safeguard budget
+        self.affordable_tokens = 10000 
     
     @observe(name="LLM Call")
     def get_completion(
@@ -50,60 +60,60 @@ class LLMClient:
         max_tokens: int = 800
     ) -> str:
         
-        # --- PRE-FLIGHT CHECK (Jury-Level) ---
+        # --- PRE-FLIGHT CHECK ---
         estimated_prompt_tokens = sum(len(m.get("content", "")) for m in messages) // 3
-        total_estimated = estimated_prompt_tokens + max_tokens
-        
-        if total_estimated > self.affordable_tokens:
-            raise InsufficientCreditsError(
-                f"Request requires ~{total_estimated} tokens, which exceeds limit of {self.affordable_tokens}. "
-                "Reduce max_tokens or top up credits."
-            )
-        # ------------------------------------
+        if (estimated_prompt_tokens + max_tokens) > self.affordable_tokens:
+            raise InsufficientCreditsError("Request exceeds token safety limit.")
+        # ------------------------
 
-        models = LLMConfig.MODELS.get(model_type, LLMConfig.MODELS["fast"])
+        # Try Primary Models (Groq)
+        primary_models = LLMConfig.MODELS.get(model_type, LLMConfig.MODELS["fast"])
         last_error = None
         
-        for model in models:
+        # 1. Attempt Primary Provider
+        for model in primary_models:
             try:
-                logger.debug(f"🔄 Trying model: {model}")
-                
-                response = self.client.chat.completions.create(
-                    model=model,
-                    messages=messages,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                    timeout=LLMConfig.TIMEOUT
-                )
-                
-                self.call_count += 1
-                if response.choices and response.choices[0].message.content:
-                    content = response.choices[0].message.content
-                    logger.debug(f"✅ Success with {model}")
-                    return content
-                else:
-                    raise Exception("Empty response from LLM")
-                
+                logger.debug(f"🔄 Trying Primary: {model}")
+                return self._execute_call(self.client, model, messages, temperature, max_tokens)
             except Exception as e:
-                err_str = str(e).lower()
-                # Stop retrying on cost/access issues
-                if "402" in err_str or "payment" in err_str or "insufficient" in err_str:
-                     logger.critical(f"💰 {model} PAYMENT REQUIRED: {e}")
-                     raise InsufficientCreditsError(str(e))
-                     
-                if "429" in err_str or "rate" in err_str:
-                    logger.warning(f"⚠️ Rate limit on {model}, waiting...")
-                    time.sleep(LLMConfig.RETRY_DELAY)
+                logger.warning(f"⚠️ Primary {model} failed: {str(e)[:100]}")
+                last_error = e
+                # Don't retry same provider if it's a rate limit, move to next model or fallback
+                continue
+
+        # 2. Attempt Fallback Provider (if enabled)
+        if self.fallback_client:
+            fallback_models = LLMConfig.FALLBACK_MODELS.get(model_type, LLMConfig.FALLBACK_MODELS["fast"])
+            logger.warning(f"🚨 Primary failed. Switching to Fallback (OpenRouter)...")
+            
+            for model in fallback_models:
+                try:
+                    logger.debug(f"🛡️ Trying Fallback: {model}")
+                    # Add provider prefix for OpenRouter if needed, usually handled by client base_url
+                    return self._execute_call(self.fallback_client, model, messages, temperature, max_tokens)
+                except Exception as e:
+                    logger.warning(f"❌ Fallback {model} failed: {str(e)[:100]}")
                     last_error = e
                     continue
-                
-                logger.warning(f"❌ {model} failed: {str(e)[:100]}")
-                last_error = e
-                continue
         
-        error_msg = f"All models failed. Last error: {last_error}"
+        error_msg = f"All models (Primary & Fallback) failed. Last error: {last_error}"
         logger.error(error_msg)
         raise Exception(error_msg)
+
+    def _execute_call(self, client, model, messages, temperature, max_tokens):
+        """Helper to execute the actual API call"""
+        response = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            timeout=LLMConfig.TIMEOUT
+        )
+        
+        self.call_count += 1
+        if response.choices and response.choices[0].message.content:
+            return response.choices[0].message.content
+        raise Exception("Empty response from LLM")
     
     @observe(name="Structured LLM Call")
     def get_structured_completion(

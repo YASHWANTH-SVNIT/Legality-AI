@@ -1,3 +1,14 @@
+---
+title: Legality AI
+emoji: ⚖️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+license: mit
+app_port: 7860
+---
+
 # Legality AI - AI-Powered Contract Risk Analyzer
 
 An intelligent contract analysis system that uses adversarial AI agents and RAG (Retrieval-Augmented Generation) to identify risky clauses in legal contracts and suggest safer alternatives.
