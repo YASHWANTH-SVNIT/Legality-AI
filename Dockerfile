@@ -17,6 +17,14 @@ WORKDIR /app
 # --- BACKEND SETUP ---
 COPY backend/requirements.txt ./backend/
 WORKDIR /app/backend
+
+# Upgrade pip
+RUN pip install --no-cache-dir --upgrade pip
+
+# Install CPU-only PyTorch (Critical for HF Spaces size/memory)
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+
+# Install remaining dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend code
