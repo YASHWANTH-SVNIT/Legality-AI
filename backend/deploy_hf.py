@@ -1,9 +1,29 @@
 import os
+import sys
 import uvicorn
+import subprocess
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+
+# --- RUNTIME VECTOR DB BUILD ---
+# This ensures we build the DB with access to runtime secrets, not during Docker build
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "chroma_db_gold")
+
+if not os.path.exists(DB_PATH):
+    print("⚠️ Vector DB not found. Building now...")
+    try:
+        # Run build_vector_db.py as a subprocess
+        # Assumes backend/ is current working directory or in path
+        build_script = os.path.join(BASE_DIR, "build_pipeline", "build_vector_db.py")
+        subprocess.run(["python", build_script], check=True)
+        print("✅ Vector DB built successfully!")
+    except Exception as e:
+        print(f"❌ Failed to build Vector DB: {e}")
+        # We don't exit, as the app might still run partially or for other reasons
+
 from src.api.routes import analysis, feedback, health, admin
 
 # Create a new app for Hugging Face deployment

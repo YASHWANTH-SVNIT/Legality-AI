@@ -2,6 +2,8 @@ FROM python:3.11-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
+    build-essential \
+    python3-dev \
     tesseract-ocr \
     tesseract-ocr-eng \
     poppler-utils \
@@ -19,9 +21,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend code
 COPY backend/ .
-
-# Build or copy vector DB
-RUN python build_pipeline/build_vector_db.py 
+# Vector DB build moved to runtime (deploy_hf.py) 
 
 # --- FRONTEND BUILD ---
 WORKDIR /app/frontend
