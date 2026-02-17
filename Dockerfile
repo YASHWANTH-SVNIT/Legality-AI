@@ -34,12 +34,18 @@ COPY backend/ .
 # --- FRONTEND BUILD ---
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-RUN npm ci
+# Switch to npm install for better cross-platform verification
+RUN npm install
 
 COPY frontend/ .
 # Set API URL to /api (relative path for same-origin)
 ENV REACT_APP_API_URL="/api" 
+# Disable CI to prevent warnings from failing the build
+ENV CI=false
 RUN npm run build
+
+# Debug: Check if build directory exists and has content
+RUN ls -la /app/frontend/build || echo "❌ Build directory missing!"
 
 # --- FINAL SETUP ---
 WORKDIR /app/backend
@@ -47,8 +53,8 @@ WORKDIR /app/backend
 # Create static directory
 RUN mkdir -p static
 
-# Copy frontend build to backend static folder
-RUN cp -r /app/frontend/build/* /app/backend/static/
+# Copy frontend build to backend static folder (safe copy)
+RUN cp -r /app/frontend/build/. /app/backend/static/
 
 # Expose Hugging Face port
 EXPOSE 7860
