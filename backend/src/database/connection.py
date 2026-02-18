@@ -44,12 +44,46 @@ def init_database():
         # Execute schema
         with get_db_connection() as conn:
             conn.executescript(schema_sql)
+            
+        # Run Migrations (Fix missing columns for existing DBs)
+        migrate_database()
         
         logger.info(f"✅ Database initialized successfully at {DB_PATH}")
         return True
     except Exception as e:
         logger.error(f"❌ Database initialization failed: {e}")
         raise
+
+def migrate_database():
+    """
+    Check for missing columns and add them (simple migration mechanism)
+    """
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Check feedback table columns
+            cursor.execute("PRAGMA table_info(feedback)")
+            columns = [info['name'] for info in cursor.fetchall()]
+            
+            # Columns to check and add if missing
+            required_cols = {
+                'user_comment': 'TEXT',
+                'pessimist_analysis': 'TEXT',
+                'optimist_analysis': 'TEXT',
+                'arbiter_reasoning': 'TEXT'
+            }
+            
+            for col, dtype in required_cols.items():
+                if col not in columns:
+                    logger.info(f"⚠️ Column {col} missing in feedback. Migrating...")
+                    cursor.execute(f"ALTER TABLE feedback ADD COLUMN {col} {dtype}")
+                    logger.info(f"✅ Added column {col}")
+                    
+    except Exception as e:
+        logger.error(f"❌ Migration failed: {e}")
+        # Don't raise, as it might be fine or already corrupted
+
 
 def get_db_stats():
     """Get database statistics"""
