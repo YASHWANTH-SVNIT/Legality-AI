@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS feedback (
     pessimist_analysis TEXT,     -- Added missing column
     optimist_analysis TEXT,      -- Added missing column
     arbiter_reasoning TEXT,      -- Added missing column
+    status TEXT DEFAULT 'pending', -- Added missing column
     user_id TEXT DEFAULT 'anonymous',
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (analysis_id) REFERENCES analyses(id)

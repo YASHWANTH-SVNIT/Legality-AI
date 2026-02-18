@@ -71,7 +71,8 @@ def migrate_database():
                 'user_comment': 'TEXT',
                 'pessimist_analysis': 'TEXT',
                 'optimist_analysis': 'TEXT',
-                'arbiter_reasoning': 'TEXT'
+                'arbiter_reasoning': 'TEXT',
+                'status': "TEXT DEFAULT 'pending'"
             }
             
             for col, dtype in required_cols.items():
