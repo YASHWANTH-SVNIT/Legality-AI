@@ -22,6 +22,10 @@ CREATE TABLE IF NOT EXISTS feedback (
     clause_text TEXT,
     system_risk_score REAL,
     suggested_fix TEXT,
+    user_comment TEXT,           -- Added missing column
+    pessimist_analysis TEXT,     -- Added missing column
+    optimist_analysis TEXT,      -- Added missing column
+    arbiter_reasoning TEXT,      -- Added missing column
     user_id TEXT DEFAULT 'anonymous',
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (analysis_id) REFERENCES analyses(id)
